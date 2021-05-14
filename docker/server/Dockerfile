@@ -3,4 +3,4 @@ RUN mkdir -p /app
 WORKDIR /app
 COPY server /app
 ENTRYPOINT ["./server"]
-EXPOSE 514
+EXPOSE 1514/udp
