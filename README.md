@@ -1,6 +1,6 @@
 # golang-training-final-task
 
-Go application witch creates grpc server and syslog server. If client is connected then client writes logs to client terminal. If client is not connected then server writes logs to server terminal. Grpc-server uses `8081` port. Syslog-server uses `1514` port.
+Go application which creates grpc server and syslog server. If client is connected then client writes logs to client terminal. If client is not connected then server writes logs to server terminal. Grpc-server uses `8081` port. Syslog-server uses `1514` port.
 
 ## How to use
 
