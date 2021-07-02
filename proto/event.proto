@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "/go_proto";
+
+package event;
+
+service EventService {
+    rpc GetEvent(stream EventRequest) returns (stream EventResponse) {}
+}
+
+message Event {
+    string message = 1;
+    string severity = 2;
+    string facility = 3;
+}
+
+message EventRequest {
+}
+
+message EventResponse {
+    Event event = 1;
+}

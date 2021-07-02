@@ -1,0 +1,19 @@
+version: "3.3"
+
+services:
+  syslog-server:
+    image: dimaxdqwerty/syslog-server:latest
+    environment:
+      - listen=0.0.0.0:1514
+    ports:
+     - 1514:1514/tcp
+    container_name: syslog-server
+  syslog-client:
+    image: dimaxdqwerty/syslog-client:latest
+    environment:
+      - listen=syslog-server:8081
+    ports:
+      - 8081:8081
+    depends_on:
+      - syslog-server
+    container_name: syslog-client
