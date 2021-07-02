@@ -21,15 +21,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go func(channel syslog.LogPartsChannel) {
-		for logParts := range channel {
-			log.WithFields(log.Fields{
-				"Facility": logParts["facility"],
-				"Message":  logParts["message"],
-				"Severity": logParts["severity"],
-			}).Info()
-		}
-	}(channel)
+	go printLogInfo(channel)
 
 	server.Wait()
+}
+
+func printLogInfo(channel syslog.LogPartsChannel) {
+	for logParts := range channel {
+		log.WithFields(log.Fields{
+			"Facility": logParts["facility"],
+			"Severity": logParts["severity"],
+		}).Info(logParts["message"])
+	}
 }
