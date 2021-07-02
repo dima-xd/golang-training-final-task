@@ -20,26 +20,11 @@ func (e EventServer) GetEvent(stream pb.EventService_GetEventServer) error {
 	syslogChannel := make(syslog.LogPartsChannel)
 	handler := syslog.NewChannelHandler(syslogChannel)
 	e.syslogServer.SetHandler(handler)
-	go func(channel syslog.LogPartsChannel) {
-		for logParts := range channel {
-			event := pb.Event{
-				Message:  fmt.Sprintf("%v", logParts["message"]),
-				Severity: fmt.Sprintf("%v", logParts["severity"]),
-				Facility: fmt.Sprintf("%v", logParts["facility"]),
-			}
-			eventChannel <- &event
-		}
-	}(syslogChannel)
-	go func() {
-		for {
-			_, err := stream.Recv()
-			if err != nil {
-				log.Println("Client disconnected...")
-				handler.SetChannel(*e.channel)
-				return
-			}
-		}
-	}()
+
+	go printLogInfo(syslogChannel, eventChannel)
+
+	go recvStream(stream, handler, e)
+
 	for {
 		err := stream.Send(&pb.EventResponse{Event: <-eventChannel})
 		if err != nil {
@@ -50,4 +35,24 @@ func (e EventServer) GetEvent(stream pb.EventService_GetEventServer) error {
 
 func NewEventServer(syslogServer *syslog.Server, channel *syslog.LogPartsChannel) *EventServer {
 	return &EventServer{syslogServer: syslogServer, channel: channel}
+}
+
+func printLogInfo(channel syslog.LogPartsChannel, eventChannel chan *go_proto.Event) {
+	for logParts := range channel {
+		event := pb.Event{
+			Message:  fmt.Sprintf("%v", logParts["message"]),
+			Severity: fmt.Sprintf("%v", logParts["severity"]),
+			Facility: fmt.Sprintf("%v", logParts["facility"]),
+		}
+		eventChannel <- &event
+	}
+}
+
+func recvStream(stream go_proto.EventService_GetEventServer, handler *syslog.ChannelHandler, e EventServer) {
+	_, err := stream.Recv()
+	if err != nil {
+		log.Println("Client disconnected...")
+		handler.SetChannel(*e.channel)
+		return
+	}
 }

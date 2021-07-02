@@ -45,15 +45,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go func(channel syslog.LogPartsChannel) {
-		for logParts := range channel {
-			log.WithFields(log.Fields{
-				"Message":  logParts["message"],
-				"Severity": logParts["severity"],
-				"Facility": logParts["facility"],
-			}).Info()
-		}
-	}(channel)
+	go printLogInfo(channel)
 
 	pb.RegisterEventServiceServer(server, api.NewEventServer(syslogServer, &channel))
 
@@ -62,4 +54,13 @@ func main() {
 	}
 
 	syslogServer.Wait()
+}
+
+func printLogInfo(channel syslog.LogPartsChannel) {
+	for logParts := range channel {
+		log.WithFields(log.Fields{
+			"Facility": logParts["facility"],
+			"Severity": logParts["severity"],
+		}).Info(logParts["message"])
+	}
 }

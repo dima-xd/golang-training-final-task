@@ -32,18 +32,21 @@ func main() {
 		log.Fatal(err)
 	}
 	for {
-		event, err := stream.Recv()
-		if err != nil {
-			log.Fatal("Can't receive stream from server")
-		}
-		err = stream.Send(&pb.EventRequest{})
-		if err != nil {
-			log.Fatal("Can't send stream to server")
-		}
-		log.WithFields(log.Fields{
-			"Message":  event.GetEvent().Message,
-			"Severity": event.GetEvent().Severity,
-			"Facility": event.GetEvent().Facility,
-		}).Info()
+		getEventInfo(stream)
 	}
+}
+
+func getEventInfo(stream go_proto.EventService_GetEventClient) {
+	event, err := stream.Recv()
+	if err != nil {
+		log.Fatal("Can't receive stream from server")
+	}
+	err = stream.Send(&pb.EventRequest{})
+	if err != nil {
+		log.Fatal("Can't send stream to server")
+	}
+	log.WithFields(log.Fields{
+		"Severity": event.GetEvent().Severity,
+		"Facility": event.GetEvent().Facility,
+	}).Info(event.GetEvent().Message)
 }
